@@ -38,15 +38,17 @@ const THEME_URL = 'audio/theme.mp3';
  * Which one you get is decided per visit, not per build, and the last one is
  * remembered so a second hoist is a different song.
  *
- * THE FILES ARE NOT IN THIS REPOSITORY
- * ------------------------------------
- * Same reason the theme slot above is empty: these are commercial recordings —
- * Ae Watan (Zee Music), Chak De India (Yash Raj), Vande Mataram / Maa Tujhe
- * Salaam (Sony), Sare Jahan Se Achha — and this repository and the site it
- * deploys to are both public, so committing them would be publishing them.
- * `public/audio/hoist/` is gitignored; drop the files in and everything below
- * works. Whatever is missing is simply skipped, and with none of them present
- * the synthesised score plays as it always did.
+ * ON THE FILES
+ * ------------
+ * These are commercial recordings — Ae Watan (Zee Music), Chak De India (Yash
+ * Raj), Vande Mataram / Maa Tujhe Salaam (Sony), Sare Jahan Se Achha — checked
+ * into a public repository at the owner's direction, for their own use. If this
+ * is ever published more widely than that, clear the rights or swap in
+ * recordings that are free to redistribute.
+ *
+ * Nothing here is required: whatever is missing from `public/audio/hoist/` is
+ * skipped, and with none of them present the synthesised score plays as it
+ * always did.
  */
 const HOIST_TRACKS = [
   'audio/hoist/ae-watan.mp3',
@@ -512,12 +514,13 @@ export function createAudio() {
       tone({ freq: 620 + Math.random() * 140, type: 'sine', peak: 0.018, attack: 0.05, hold: 0.06, release: 0.25, dest: ambienceGain });
     },
 
-    /** The flag opens: the song, and sixty people reacting. */
+    /** The flag opens: the song, the cloth, and sixty people reacting. */
     unfurl() {
       if (!started) return;
       scoreLevel = 1;
-      // The song, if one shipped. Everything below still fires either way —
-      // with no song this behaves exactly as it did before.
+      // The song starts on the knot letting go — the same instant the cloth
+      // peels open. Everything below still fires either way; with no song this
+      // behaves exactly as it did before.
       if (song) playSong();
       else fadeTheme(0.75, 1.5);
 

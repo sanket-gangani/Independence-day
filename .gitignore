@@ -3,9 +3,3 @@ dist/
 .DS_Store
 *.local
 .vite/
-
-# The hoist songs. The code finds whatever is in here and plays one at random,
-# so the folder is all that is needed to make it work locally — but these four
-# are commercial recordings, and this repository and its deployment are both
-# public. Committing them would publish them. See src/audio/audio.js.
-public/audio/hoist/
