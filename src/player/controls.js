@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { isTyping } from '../core/keys.js';
 
 /**
  * Walking, and the third-person camera.
@@ -50,6 +51,11 @@ export function createControls(camera, domElement, { start = { x: 1.4, z: 12 }, 
   };
 
   const onKeyDown = (e) => {
+    // Never eat a keystroke that belongs to a text field, and never claim the
+    // movement keys before the player is actually in the courtyard — the title
+    // card's name and place inputs are on screen the whole time this listener
+    // is attached.
+    if (!enabled || isTyping(e.target)) return;
     const k = KEYMAP[e.code];
     if (k) {
       keys.add(k);

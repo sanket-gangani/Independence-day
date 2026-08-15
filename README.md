@@ -41,6 +41,21 @@ Movement is body-relative rather than camera-relative on purpose. With
 camera-relative movement, looking around silently redefines which way "forward"
 is, so a drag would send you off in a direction you never asked for.
 
+`Enter` in either title field starts the ceremony.
+
+### Global key handlers and text fields
+
+Every `window`-level key listener calls `isTyping(e.target)` from
+`src/core/keys.js` first, and the movement keys are additionally ignored until
+`controls.setEnabled(true)`.
+
+This is not defensive tidiness — it was a real bug. The listeners call
+`preventDefault()` on W, A, S, D, E, space and the arrows, and they are
+attached while the title card is still on screen, so those keystrokes never
+reached the name and place inputs: "Bengaluru" came out "Bengluru" and
+"Sandeep" lost two letters. If you add another global key handler, guard it the
+same way.
+
 ---
 
 ## Sound

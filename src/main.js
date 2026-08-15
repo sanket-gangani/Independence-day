@@ -3,6 +3,7 @@ import * as THREE from 'three';
 
 import { createRenderer } from './core/renderer.js';
 import { detectQuality } from './core/quality.js';
+import { isTyping } from './core/keys.js';
 import { createSky } from './world/sky.js';
 import { createPlaza } from './world/plaza.js';
 import { createSociety } from './world/society.js';
@@ -231,13 +232,29 @@ function pull() {
   if (state === STATE.WALK && distanceToRope() <= REACH) grabRope();
 }
 
-// E, space or enter all take the rope.
+// E, space or enter all take the rope — but not while somebody is typing
+// their name, and not before they have stepped into the courtyard. This
+// listener used to swallow E and space everywhere on the page.
 window.addEventListener('keydown', (e) => {
+  if (isTyping(e.target)) return;
+  if (state === STATE.LOADING || state === STATE.TITLE) return;
   if (e.code === 'KeyE' || e.code === 'Space' || e.code === 'Enter') {
     e.preventDefault();
     pull();
   }
 });
+
+// Enter in either title field starts the ceremony, which is what pressing
+// Enter in a form is for.
+for (const id of ['input-name', 'input-place']) {
+  document.getElementById(id).addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.target.blur();
+      document.getElementById('btn-begin').click();
+    }
+  });
+}
 
 // Tapping the scene near the rope takes it, so a phone player never has to
 // find the button.
