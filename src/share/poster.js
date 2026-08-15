@@ -144,10 +144,12 @@ export function makePoster({ sceneImage, name = '', moment = null }) {
     ctx.fillText(stamp, W / 2, y);
   }
 
-  ctx.fillStyle = 'rgba(255,255,255,0.26)';
-  ctx.font = '500 16px ui-sans-serif, system-ui, sans-serif';
+  // The credit on the thing that actually gets forwarded, so it is set to be
+  // read rather than merely present.
+  ctx.fillStyle = 'rgba(255,255,255,0.68)';
+  ctx.font = '600 21px ui-sans-serif, system-ui, sans-serif';
   ctx.letterSpacing = '4px';
-  ctx.fillText('FUTURELAB STUDIOS', W / 2, H - 44);
+  ctx.fillText('POWERED BY FUTURELAB STUDIOS', W / 2, H - 44);
   ctx.letterSpacing = '0px';
 
   return c;

@@ -599,13 +599,17 @@ h2 {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: max(0.4rem, env(safe-area-inset-bottom));
+  bottom: max(0.55rem, env(safe-area-inset-bottom));
   z-index: 20;
   text-align: center;
-  font-size: 0.55rem;
-  letter-spacing: 0.28em;
+  font-size: 0.78rem;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(246, 241, 231, 0.3);
+  color: rgba(246, 241, 231, 0.72);
+  /* It sits directly on the scene, which runs from bright sky to pale paving
+     depending on where the camera is. The shadow is what keeps it readable
+     over both. */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
   pointer-events: none;
 }
 
@@ -665,7 +669,8 @@ h2 {
   }
 
   .brandmark {
-    font-size: 0.5rem;
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
   }
 }
 
