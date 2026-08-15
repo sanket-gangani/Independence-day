@@ -769,11 +769,23 @@ export function makeBannerTexture() {
 
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
+  // Set to leave a real margin of blank vinyl at both ends.
+  //
+  // The banner is 7.6m of cloth strung between poles 8.2m apart, and on a
+  // phone held upright the camera only holds about 4.2m of width at the
+  // distance someone stands when they walk up to the table. At the old size
+  // the greeting ran nearly edge to edge — 65% of the cloth — so the ends of
+  // it were the first thing to leave the frame, and players on portrait
+  // screens were reading '...दिवस · 15' with the month cut off.
+  //
+  // Sized down, the greeting occupies just over half the cloth and survives
+  // that crop whole. It also reads as a printed banner rather than one whose
+  // artwork was set too big for it.
   ctx.fillStyle = '#12306a';
-  ctx.font = '800 104px Georgia, "Times New Roman", serif';
+  ctx.font = '800 84px Georgia, "Times New Roman", serif';
   ctx.fillText('स्वतंत्रता दिवस  ·  15 अगस्त', W / 2, H * 0.37);
   ctx.fillStyle = '#8a3b18';
-  ctx.font = '700 58px Georgia, serif';
+  ctx.font = '700 47px Georgia, serif';
   ctx.fillText('HAPPY INDEPENDENCE DAY', W / 2, H * 0.72);
 
   // Printed vinyl is never perfectly flat or perfectly clean.
