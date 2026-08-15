@@ -16,7 +16,7 @@ import { createControls } from './player/controls.js';
 import { createUI } from './ui/ui.js';
 import { createAudio } from './audio/audio.js';
 import { makePoster, captureCanvas } from './share/poster.js';
-import { captureMoment, placeHint, shareMessage, shareUrl } from './share/moment.js';
+import { captureMoment, placeHint, shareMessage, photoCaption, shareUrl } from './share/moment.js';
 
 /* ------------------------------------------------------------------ */
 
@@ -198,7 +198,8 @@ ui.on('btn-begin', () => {
 ui.on('btn-share', share);
 ui.on('btn-poster-close', () => ui.show('celebrate'));
 ui.on('btn-download', savePoster);
-ui.on('btn-share-native', sharePoster);
+ui.on('btn-share-link', shareLink);
+ui.on('btn-share-photo', sharePhoto);
 ui.on('btn-sound', () => ui.setMuted(world.audio.toggleMute()));
 ui.onPress('prompt', () => pull());
 
@@ -400,35 +401,73 @@ function posterFile() {
  * all, and hiding the control there just leaves someone hunting for it; on
  * those, this quietly saves the image instead and says so.
  */
-async function sharePoster() {
-  if (!posterUrl) return;
-  const file = posterFile();
+/**
+ * Sends the invitation: the message and the link, and nothing else.
+ *
+ * WHY THIS IS SEPARATE FROM THE PHOTO
+ * -----------------------------------
+ * These two used to be one button that shared the image with the link in its
+ * caption, and WhatsApp stopped accepting it. A payload carrying both a file
+ * and a URL is two attachment types; WhatsApp's share target takes one, so the
+ * whole share failed — while Twitter, which is happy to take both, kept
+ * working. Hence one payload, one kind of thing, every time.
+ *
+ * The url is embedded in `text` rather than passed as `navigator.share({url})`
+ * for the same reason: passing both produces a string *and* a URL item, which
+ * is two things again.
+ */
+async function shareLink() {
   const url = shareUrl();
   const text = shareMessage(moment, playerName, url);
-  const title = 'I hoisted the flag 🇮🇳';
 
   try {
-    // The photograph *and* the message, so WhatsApp shows the picture with a
-    // caption that carries the invitation and a tappable link underneath it.
-    if (navigator.canShare?.({ files: [file] })) {
-      await navigator.share({ files: [file], title, text });
-      return;
-    }
-    // No file support: send the link on its own, which previews from the
-    // Open Graph card instead.
     if (navigator.share) {
-      await navigator.share({ title, text, url });
+      await navigator.share({ title: 'I hoisted the flag 🇮🇳', text });
       return;
     }
   } catch (err) {
-    // Closing the sheet is not a failure.
     if (err?.name === 'AbortError') return;
-    console.warn('share failed', err);
+    console.warn('link share failed', err);
   }
 
-  // No share sheet on this browser: do the useful thing instead of nothing.
+  // No share sheet: put it on the clipboard, which is the next most useful
+  // thing and is what a desktop user wants anyway.
+  try {
+    await navigator.clipboard.writeText(text);
+    ui.flash('share-link-label', 'Copied — paste it anywhere');
+    return;
+  } catch {
+    /* clipboard blocked; fall through */
+  }
+  ui.flash('share-link-label', 'Could not open sharing');
+}
+
+/** Sends the photograph, with a caption but no link. */
+async function sharePhoto() {
+  if (!posterUrl) return;
+  const file = posterFile();
+
+  try {
+    if (navigator.canShare?.({ files: [file] })) {
+      await navigator.share({ files: [file], text: photoCaption(moment, playerName) });
+      return;
+    }
+  } catch (err) {
+    if (err?.name === 'AbortError') return;
+    console.warn('photo share failed', err);
+    // Some targets reject any caption alongside a file. Retry with the image
+    // on its own before giving up on sharing entirely.
+    try {
+      await navigator.share({ files: [file] });
+      return;
+    } catch (err2) {
+      if (err2?.name === 'AbortError') return;
+      console.warn('bare photo share failed', err2);
+    }
+  }
+
   savePoster();
-  ui.flashShare('Saved to your device');
+  ui.flash('share-photo-label', 'Saved to your device');
 }
 
 function savePoster() {

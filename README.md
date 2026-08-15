@@ -247,7 +247,27 @@ One button, calling `navigator.share` with the rendered JPEG attached. That
 opens the operating system's own sheet — WhatsApp, Instagram, Telegram,
 Messages, Mail, AirDrop, whatever is installed — and hands over the real image.
 
-The message that goes with it carries a link:
+### Two shares, not one
+
+There are two share buttons, and that is not indecision — it is a compatibility
+requirement.
+
+They started as one button that shared the poster with the link in its caption.
+Twitter was happy with that. WhatsApp stopped working entirely, because a
+payload carrying both a file and a URL is *two attachment types*, and
+WhatsApp's share target accepts one. So:
+
+| Button | Payload | What the recipient gets |
+| --- | --- | --- |
+| **Send the invite** | `{ title, text }` — message with the URL in the body | The message, and the link previewing from the Open Graph card |
+| **Send photo** | `{ files, text }` — the poster with a caption, no URL | The photograph with a caption under it |
+
+The URL is embedded in `text` rather than passed as `navigator.share({ url })`
+for the same reason: passing both produces a string *and* a URL item, which is
+two things again. `sharePhoto()` also retries with the bare file if a target
+rejects the caption.
+
+The invite message reads:
 
 ```
 Sanket hoisted the flag 🇮🇳
@@ -257,14 +277,7 @@ Your turn — walk up to the pole and pull the rope yourself:
 https://your-domain/
 ```
 
-So the photograph and the invitation travel together: WhatsApp shows the image
-with that caption underneath and the URL tappable. A picture on its own stops
-with whoever receives it; the link keeps going.
-
-The URL is embedded in the message body rather than passed as
-`navigator.share({ url })`, because share targets differ on whether they use
-the `url` field, concatenate it, or drop it — putting it in the text is the
-only way to know exactly what lands in the message.
+A picture on its own stops with whoever receives it; the link keeps going.
 
 ### The link preview
 

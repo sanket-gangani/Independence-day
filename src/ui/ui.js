@@ -95,10 +95,10 @@ export function createUI() {
      * The button is never hidden. An earlier version removed it on browsers
      * with no `navigator.share` — which is most desktop browsers — and the
      * result was someone staring at the poster asking where the share option
-     * had gone. It is always there; what it does underneath adapts.
+     * had gone. They are always there; what they do underneath adapts.
      */
-    flashShare(text, ms = 2200) {
-      const el = $('share-label');
+    flash(id, text, ms = 2600) {
+      const el = $(id);
       const original = el.dataset.original || el.textContent;
       el.dataset.original = original;
       el.textContent = text;

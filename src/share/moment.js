@@ -99,6 +99,19 @@ export function captureMoment(place = '') {
  * `url` field, concatenate it, or drop it, and putting it in the body is the
  * only way to know exactly what lands in the message.
  */
+/**
+ * The caption that rides along with the photograph.
+ *
+ * Deliberately carries NO url. A share payload containing both an image and a
+ * link is two attachment types, and WhatsApp's share target accepts one — that
+ * combination is exactly what stopped WhatsApp working. The link goes out as
+ * its own share instead.
+ */
+export function photoCaption(moment, name = '') {
+  const who = name ? `${name} hoisted the flag 🇮🇳` : 'I hoisted the flag 🇮🇳';
+  return moment?.full ? `${who}\n${moment.full}` : who;
+}
+
 export function shareMessage(moment, name = '', url = '') {
   const who = name ? `${name} hoisted the flag 🇮🇳` : 'I hoisted the flag 🇮🇳';
   const lines = [who];
