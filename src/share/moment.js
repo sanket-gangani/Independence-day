@@ -100,6 +100,12 @@ export function captureMoment(place = '') {
  * only way to know exactly what lands in the message.
  */
 /**
+ * The sign-off on anything that leaves the page. Both shares are standalone —
+ * either can arrive without the other — so each one carries it.
+ */
+const CREDIT = 'Powered by Futurelab Studios';
+
+/**
  * The caption that rides along with the photograph.
  *
  * Deliberately carries NO url. A share payload containing both an image and a
@@ -109,7 +115,11 @@ export function captureMoment(place = '') {
  */
 export function photoCaption(moment, name = '') {
   const who = name ? `${name} hoisted the flag 🇮🇳` : 'I hoisted the flag 🇮🇳';
-  return moment?.full ? `${who}\n${moment.full}` : who;
+  const lines = [who];
+  if (moment?.full) lines.push(moment.full);
+  lines.push('');
+  lines.push(CREDIT);
+  return lines.join('\n');
 }
 
 export function shareMessage(moment, name = '', url = '') {
@@ -119,6 +129,8 @@ export function shareMessage(moment, name = '', url = '') {
   lines.push('');
   lines.push('Your turn — walk up to the pole and pull the rope yourself:');
   if (url) lines.push(url);
+  lines.push('');
+  lines.push(CREDIT);
   return lines.join('\n');
 }
 
