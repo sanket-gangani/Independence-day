@@ -197,9 +197,57 @@ ui.on('btn-begin', () => {
 
 ui.on('btn-share', share);
 ui.on('btn-poster-close', () => ui.show('celebrate'));
+ui.on('btn-again', hoistAgain);
 ui.on('btn-share-link', shareLink);
 ui.on('btn-sound', () => ui.setMuted(world.audio.toggleMute()));
 ui.onPress('prompt', () => pull());
+
+/**
+ * Puts the courtyard back to the moment before the hoist.
+ *
+ * The only way to do this used to be a page reload, which meant waiting out
+ * the loader and typing your name again to watch a thirty-second ceremony.
+ * Nothing here needs rebuilding — the scene, the crowd and the flag are all
+ * still standing — so this winds the run's own state back and hands control
+ * over, and the name and place are kept because they are still true.
+ *
+ * The poster is dropped rather than kept: it is a photograph of a specific
+ * hoist at a specific minute, and the next one gets its own.
+ */
+function hoistAgain() {
+  state = STATE.WALK;
+  stateTime = 0;
+
+  hoist = 0;
+  hoistShown = 0;
+  open = 0;
+  gripWeight = 0;
+  pullPhase = 0;
+  haulTime = -1;
+  salute = 0;
+  cine = 0;
+
+  moment = null;
+  flowersFired = false;
+  confettiFired = false;
+  celebrateShown = false;
+  posterCanvas = null;
+  posterUrl = null;
+
+  world.flag.setHoist(0);
+  world.flag.setOpen(0);
+  world.crowd.setReaction(0);
+  world.crowd.setHoist(0);
+  world.petals.clear();
+
+  world.controls.reset();
+  world.controls.setLocked(false);
+  world.controls.setEnabled(true);
+
+  ui.setHoist(false, 0);
+  ui.setPrompt(false);
+  ui.show('hud');
+}
 
 function distanceToRope() {
   const p = world.controls.position;

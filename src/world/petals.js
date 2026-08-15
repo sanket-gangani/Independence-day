@@ -203,6 +203,16 @@ export function createPetals(scene) {
       confetti.points.visible = true;
     },
 
+    /**
+     * Takes the flowers back out of the air, for a second run at the pole.
+     * Hiding the points is enough — each burst restamps its own start time,
+     * so nothing carries over from the last one.
+     */
+    clear() {
+      petals.points.visible = false;
+      confetti.points.visible = false;
+    },
+
     update(dt) {
       petals.uniforms.uTime.value += dt;
       confetti.uniforms.uTime.value += dt;

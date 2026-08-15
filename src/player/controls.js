@@ -166,6 +166,25 @@ export function createControls(camera, domElement, { start = { x: 1.4, z: 12 }, 
       enabled = v;
       if (!v) keys.clear();
     },
+
+    /**
+     * Puts the player back where they walked in from, facing the pole.
+     *
+     * Everything that carries momentum is zeroed too, not just the position:
+     * a held key or a residual speed would otherwise have them drifting off
+     * the mark the instant the courtyard came back.
+     */
+    reset() {
+      position.set(start.x, 0, start.z);
+      heading = Math.PI;
+      orbitYaw = 0;
+      orbitPitch = 0.16;
+      speed = 0;
+      moving = false;
+      keys.clear();
+      touchWalk = 0;
+      touchSteer = 0;
+    },
     setLocked(v) {
       locked = v;
       if (v) keys.clear();
