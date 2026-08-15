@@ -249,6 +249,9 @@ function hoistAgain() {
   world.controls.reset();
   world.controls.setLocked(false);
   world.controls.setEnabled(true);
+  // Stops the song, brings the courtyard back, and draws a different track for
+  // the next hoist.
+  world.audio?.reset();
 
   ui.setHoist(false, 0);
   ui.setPrompt(false);
