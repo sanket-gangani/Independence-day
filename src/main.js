@@ -238,6 +238,7 @@ function hoistAgain() {
   celebrateShown = false;
   posterCanvas = null;
   posterUrl = null;
+  heroShot = null;
 
   world.flag.setHoist(0);
   world.flag.setOpen(0);
@@ -396,6 +397,8 @@ function updateCinematicCamera(dt) {
 
 let posterCanvas = null;
 let posterUrl = null;
+/** The frame the ceremony ended on, kept from before the player took over. */
+let heroShot = null;
 
 async function share() {
   ui.show('poster');
@@ -414,7 +417,10 @@ async function share() {
     requestAnimationFrame(finish);
     setTimeout(finish, 250);
   });
-  const sceneImage = await captureCanvas(canvas);
+  // The kept frame if there is one, and only otherwise whatever is on screen
+  // now — which is the right fallback for a capture that failed rather than a
+  // reason to photograph a wall.
+  const sceneImage = (await heroShot) || (await captureCanvas(canvas));
   posterCanvas = makePoster({ sceneImage, name: playerName, moment });
   posterUrl = posterCanvas.toDataURL('image/jpeg', 0.92);
   ui.setPoster(posterUrl);
@@ -571,7 +577,9 @@ function frame(dt) {
     }
 
     case STATE.CELEBRATE: {
-      salute = THREE.MathUtils.damp(salute, 1, 2, dt);
+      // They hold the salute until they walk out of it, which is roughly what
+      // people do — stand to it for a moment, then go and find everyone.
+      salute = THREE.MathUtils.damp(salute, controls.moving ? 0 : 1, 2, dt);
       // A beat of clean frame first. The hero shot is the thing people
       // screenshot, so it gets a couple of seconds with nothing on top of it
       // before the card slides in. Latched: testing `ui.current` instead would
@@ -579,6 +587,21 @@ function frame(dt) {
       if (stateTime > 2.4 && !celebrateShown) {
         celebrateShown = true;
         ui.show('celebrate');
+        // Keep the shot the ceremony ended on, before the camera belongs to
+        // the player again. The poster is captioned "I hoisted the flag", and
+        // once they can walk off they will — a photograph taken facing a wall
+        // two minutes later is not what that caption is describing. Read now,
+        // while the cinematic frame is still the one on the canvas.
+        heroShot = captureCanvas(canvas);
+        // And the courtyard comes back with it. The orbit is a nice shot to
+        // arrive on, but it is not somewhere to be stuck: the ceremony is
+        // over, the society is still out there, and people want to walk round
+        // and look at it. The gameplay camera picks up from wherever the
+        // cinematic left off — it damps toward its mark rather than cutting,
+        // so this reads as the camera settling rather than a jump.
+        cine = 0;
+        controls.setLocked(false);
+        controls.setEnabled(true);
       }
       break;
     }
@@ -598,7 +621,10 @@ function frame(dt) {
   }
 
   /* --- the player --- */
-  const walking = state === STATE.WALK;
+  // Both of the states the player is on their own feet in. Without CELEBRATE
+  // here they would slide around the courtyard after the ceremony with their
+  // legs still.
+  const walking = state === STATE.WALK || state === STATE.CELEBRATE;
   controls.update(dt, cine < 0.5);
   player.root.position.copy(controls.position);
   player.root.rotation.y = controls.heading;
