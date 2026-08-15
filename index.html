@@ -229,9 +229,9 @@
     <div id="poster" class="screen hidden gone">
       <div class="sheet poster-sheet">
         <img id="poster-img" alt="Your Independence Day photograph" />
-        <!-- Two separate shares on purpose. A single payload carrying both the
-             image and a link is two attachment types, and WhatsApp's share
-             target accepts one — that combination is what stopped working. -->
+        <!-- One button on purpose. The photograph is here to be looked at; the
+             invite is the thing that travels, and it carries its own preview
+             card, so the picture reaches people through the link. -->
         <button id="btn-share-link" class="btn primary" type="button">
           <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 3.5v11" />
@@ -240,12 +240,6 @@
           </svg>
           <span id="share-link-label">Send the invite</span>
         </button>
-        <div class="share-row">
-          <button id="btn-share-photo" class="btn ghost" type="button">
-            <span id="share-photo-label">Send photo</span>
-          </button>
-          <button id="btn-download" class="btn ghost" type="button">Save</button>
-        </div>
         <button id="btn-poster-close" class="btn link" type="button">Back to the courtyard</button>
       </div>
     </div>

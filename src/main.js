@@ -16,7 +16,7 @@ import { createControls } from './player/controls.js';
 import { createUI } from './ui/ui.js';
 import { createAudio } from './audio/audio.js';
 import { makePoster, captureCanvas } from './share/poster.js';
-import { captureMoment, placeHint, shareMessage, photoCaption, shareUrl } from './share/moment.js';
+import { captureMoment, placeHint, shareMessage, shareUrl } from './share/moment.js';
 
 /* ------------------------------------------------------------------ */
 
@@ -197,9 +197,7 @@ ui.on('btn-begin', () => {
 
 ui.on('btn-share', share);
 ui.on('btn-poster-close', () => ui.show('celebrate'));
-ui.on('btn-download', savePoster);
 ui.on('btn-share-link', shareLink);
-ui.on('btn-share-photo', sharePhoto);
 ui.on('btn-sound', () => ui.setMuted(world.audio.toggleMute()));
 ui.onPress('prompt', () => pull());
 
@@ -371,50 +369,22 @@ async function share() {
 }
 
 /**
- * The poster as a File, built synchronously.
+ * Sends the invitation: the message and the link, and nothing else.
  *
- * Deliberately not `canvas.toBlob`. That defers its callback to a task, and a
- * tab that is not currently being composited can sit on that task for a long
- * time — which showed up as a Share button that appeared to do nothing at all.
- * The data URL already exists, because it is what the preview image is
- * showing, so decode that instead and hand back the file immediately.
- */
-function posterFile() {
-  const comma = posterUrl.indexOf(',') + 1;
-  const bin = atob(posterUrl.slice(comma));
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  return new File([bytes], 'i-hoisted-the-flag.jpg', { type: 'image/jpeg' });
-}
-
-/**
- * Share.
+ * This is now the only way anything leaves the page. Sharing the poster as a
+ * file is gone, and with it the whole class of bugs that came from putting an
+ * attachment in a share payload — WhatsApp's target takes one kind of thing,
+ * and a file plus a link is two. The picture still travels, as the link's own
+ * preview card, which is served from static og: tags and needs nothing of the
+ * share sheet.
  *
- * Deliberately the operating system's own sheet rather than a row of per-app
- * buttons: `navigator.share` with a file attached opens the system chooser,
- * which already lists WhatsApp, Instagram, Telegram, Messages, Mail, AirDrop
- * and everything else the person actually has installed — and it hands over
- * the real image rather than a link. A hand-rolled WhatsApp button could only
- * ever pass text, because no app-scheme URL can carry an attachment.
+ * The url is embedded in `text` rather than passed as `navigator.share({url})`
+ * for that same reason: passing both produces a string *and* a URL item, which
+ * is two things again.
  *
  * The button is ALWAYS shown. Most desktop browsers have no share sheet at
  * all, and hiding the control there just leaves someone hunting for it; on
- * those, this quietly saves the image instead and says so.
- */
-/**
- * Sends the invitation: the message and the link, and nothing else.
- *
- * WHY THIS IS SEPARATE FROM THE PHOTO
- * -----------------------------------
- * These two used to be one button that shared the image with the link in its
- * caption, and WhatsApp stopped accepting it. A payload carrying both a file
- * and a URL is two attachment types; WhatsApp's share target takes one, so the
- * whole share failed — while Twitter, which is happy to take both, kept
- * working. Hence one payload, one kind of thing, every time.
- *
- * The url is embedded in `text` rather than passed as `navigator.share({url})`
- * for the same reason: passing both produces a string *and* a URL item, which
- * is two things again.
+ * those, this copies the message instead and says so.
  */
 async function shareLink() {
   const url = shareUrl();
@@ -440,44 +410,6 @@ async function shareLink() {
     /* clipboard blocked; fall through */
   }
   ui.flash('share-link-label', 'Could not open sharing');
-}
-
-/** Sends the photograph, with a caption but no link. */
-async function sharePhoto() {
-  if (!posterUrl) return;
-  const file = posterFile();
-
-  try {
-    if (navigator.canShare?.({ files: [file] })) {
-      await navigator.share({ files: [file], text: photoCaption(moment, playerName) });
-      return;
-    }
-  } catch (err) {
-    if (err?.name === 'AbortError') return;
-    console.warn('photo share failed', err);
-    // Some targets reject any caption alongside a file. Retry with the image
-    // on its own before giving up on sharing entirely.
-    try {
-      await navigator.share({ files: [file] });
-      return;
-    } catch (err2) {
-      if (err2?.name === 'AbortError') return;
-      console.warn('bare photo share failed', err2);
-    }
-  }
-
-  savePoster();
-  ui.flash('share-photo-label', 'Saved to your device');
-}
-
-function savePoster() {
-  if (!posterUrl) return;
-  const url = URL.createObjectURL(posterFile());
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'i-hoisted-the-flag.jpg';
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
 /* ---------------------------- loop ---------------------------- */

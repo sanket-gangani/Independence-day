@@ -276,13 +276,6 @@ h2 {
 }
 
 /* The two secondary actions sit side by side under the primary one. */
-.share-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.55rem;
-  width: 100%;
-}
-
 .btn-icon {
   width: 1.15rem;
   height: 1.15rem;
