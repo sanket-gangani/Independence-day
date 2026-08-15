@@ -83,32 +83,36 @@ export function captureMoment(place = '') {
     stamp: trimmed ? `${trimmed} · ${time}` : time,
     /** "Shanti Nagar · 15 August 2026, 7:42 am" */
     full: [trimmed, `${dateLong}, ${time}`].filter(Boolean).join(' · '),
+    /**
+     * "Shanti Nagar · 15 August 2026" — the same line without the clock, for
+     * the message that goes out to other people. The minute is worth having on
+     * your own screen and on your own photograph; in somebody else's chat it
+     * is a detail about your morning that the message does not need.
+     */
+    dated: [trimmed, dateLong].filter(Boolean).join(' · '),
   };
 }
 
+/** The sign-off on the message that leaves the page. */
+const CREDIT = 'Powered by Futurelab Studios';
+
 /**
- * The message that goes out with the photograph.
+ * The message that goes out.
  *
  * Two jobs, and the second one is the one that matters. First it says what
- * this is — who hoisted it, where, and at what time. Then it hands the reader
- * a way to do it themselves, because a picture someone can only look at stops
- * with them, and a link keeps going.
+ * this is — who hoisted it, and where. Then it hands the reader a way to do it
+ * themselves, because a picture someone can only look at stops with them, and
+ * a link keeps going.
  *
  * The URL is embedded in the text rather than passed separately as
  * `navigator.share({ url })`: share targets differ on whether they use the
  * `url` field, concatenate it, or drop it, and putting it in the body is the
  * only way to know exactly what lands in the message.
  */
-/**
- * The sign-off on anything that leaves the page. Both shares are standalone —
- * either can arrive without the other — so each one carries it.
- */
-const CREDIT = 'Powered by Futurelab Studios';
-
 export function shareMessage(moment, name = '', url = '') {
   const who = name ? `${name} hoisted the flag 🇮🇳` : 'I hoisted the flag 🇮🇳';
   const lines = [who];
-  if (moment?.full) lines.push(moment.full);
+  if (moment?.dated) lines.push(moment.dated);
   lines.push('');
   lines.push('Your turn — walk up to the pole and pull the rope yourself:');
   if (url) lines.push(url);
