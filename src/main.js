@@ -1,5 +1,6 @@
 import './style.css';
 import * as THREE from 'three';
+import { inject, track } from '@vercel/analytics';
 
 import { createRenderer } from './core/renderer.js';
 import { detectQuality } from './core/quality.js';
@@ -31,6 +32,10 @@ const REACH = 3.2; // how close before the rope can be taken
  * long steady pull, so that is what this is now: take the rope, and it goes up.
  */
 const HOIST_TIME = 3.1;
+
+// Counted before anything is built, so a browser that cannot start WebGL at all
+// still shows up as a visit rather than vanishing.
+inject();
 
 const ui = createUI();
 const canvas = document.getElementById('scene');
@@ -522,7 +527,13 @@ function frame(dt) {
 
     case STATE.TOP: {
       // The flag is at the top: this is the instant worth recording.
-      if (!moment) moment = captureMoment(playerPlace);
+      if (!moment) {
+        moment = captureMoment(playerPlace);
+        // Pageviews say how many people opened the link; this says how many
+        // actually got the tricolour up. No properties are attached — the name
+        // and place are the player's, and they stay on their machine.
+        track('hoist');
+      }
       gripWeight = THREE.MathUtils.damp(gripWeight, stateTime > 0.7 ? 0 : 1, 4, dt);
           if (stateTime > 1.15) {
         state = STATE.UNFURL;
