@@ -85,3 +85,35 @@ export function captureMoment(place = '') {
     full: [trimmed, `${dateLong}, ${time}`].filter(Boolean).join(' · '),
   };
 }
+
+/**
+ * The message that goes out with the photograph.
+ *
+ * Two jobs, and the second one is the one that matters. First it says what
+ * this is — who hoisted it, where, and at what time. Then it hands the reader
+ * a way to do it themselves, because a picture someone can only look at stops
+ * with them, and a link keeps going.
+ *
+ * The URL is embedded in the text rather than passed separately as
+ * `navigator.share({ url })`: share targets differ on whether they use the
+ * `url` field, concatenate it, or drop it, and putting it in the body is the
+ * only way to know exactly what lands in the message.
+ */
+export function shareMessage(moment, name = '', url = '') {
+  const who = name ? `${name} hoisted the flag 🇮🇳` : 'I hoisted the flag 🇮🇳';
+  const lines = [who];
+  if (moment?.full) lines.push(moment.full);
+  lines.push('');
+  lines.push('Your turn — walk up to the pole and pull the rope yourself:');
+  if (url) lines.push(url);
+  return lines.join('\n');
+}
+
+/** The page's own address, without any query string or hash. */
+export function shareUrl() {
+  try {
+    return `${window.location.origin}${window.location.pathname}`.replace(/index\.html$/, '');
+  } catch {
+    return '';
+  }
+}

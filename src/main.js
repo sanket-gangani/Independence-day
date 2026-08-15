@@ -15,7 +15,7 @@ import { createControls } from './player/controls.js';
 import { createUI } from './ui/ui.js';
 import { createAudio } from './audio/audio.js';
 import { makePoster, captureCanvas } from './share/poster.js';
-import { captureMoment, placeHint } from './share/moment.js';
+import { captureMoment, placeHint, shareMessage, shareUrl } from './share/moment.js';
 
 /* ------------------------------------------------------------------ */
 
@@ -386,15 +386,21 @@ function posterFile() {
 async function sharePoster() {
   if (!posterUrl) return;
   const file = posterFile();
-  const text = moment ? `I hoisted the flag 🇮🇳 ${moment.full}` : 'I hoisted the flag 🇮🇳';
+  const url = shareUrl();
+  const text = shareMessage(moment, playerName, url);
+  const title = 'I hoisted the flag 🇮🇳';
 
   try {
+    // The photograph *and* the message, so WhatsApp shows the picture with a
+    // caption that carries the invitation and a tappable link underneath it.
     if (navigator.canShare?.({ files: [file] })) {
-      await navigator.share({ files: [file], text });
+      await navigator.share({ files: [file], title, text });
       return;
     }
+    // No file support: send the link on its own, which previews from the
+    // Open Graph card instead.
     if (navigator.share) {
-      await navigator.share({ text });
+      await navigator.share({ title, text, url });
       return;
     }
   } catch (err) {

@@ -232,6 +232,46 @@ One button, calling `navigator.share` with the rendered JPEG attached. That
 opens the operating system's own sheet — WhatsApp, Instagram, Telegram,
 Messages, Mail, AirDrop, whatever is installed — and hands over the real image.
 
+The message that goes with it carries a link:
+
+```
+Sanket hoisted the flag 🇮🇳
+Bengaluru · 15 August 2026, 7:42 am
+
+Your turn — walk up to the pole and pull the rope yourself:
+https://your-domain/
+```
+
+So the photograph and the invitation travel together: WhatsApp shows the image
+with that caption underneath and the URL tappable. A picture on its own stops
+with whoever receives it; the link keeps going.
+
+The URL is embedded in the message body rather than passed as
+`navigator.share({ url })`, because share targets differ on whether they use
+the `url` field, concatenate it, or drop it — putting it in the text is the
+only way to know exactly what lands in the message.
+
+### The link preview
+
+`index.html` carries Open Graph and Twitter card tags, with a real 1200×630
+frame of the ceremony at `public/share-card.jpg`, so the bare link previews
+with a thumbnail wherever it is pasted.
+
+`og:image` **must be absolute** — WhatsApp will silently show no thumbnail
+rather than resolve a relative one. The origin is substituted into
+`%SITE_URL%` at build time by a small plugin in `vite.config.js`, which reads,
+in order:
+
+| Variable | Where it comes from |
+| --- | --- |
+| `SITE_URL` | set it yourself, e.g. `https://example.com` |
+| `VERCEL_PROJECT_PRODUCTION_URL` | Vercel's stable production domain |
+| `VERCEL_URL` | Vercel's per-deployment URL |
+
+On Vercel this needs no configuration. Anywhere else, set `SITE_URL` before
+building, or the tags fall back to root-relative paths — fine for a root
+deploy, but not guaranteed to preview.
+
 There is deliberately no per-app button. No app-scheme URL can carry an
 attachment, so a hand-rolled WhatsApp link could only ever have passed text.
 

@@ -18,10 +18,34 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Hoist the Flag" />
 
-    <meta property="og:title" content="I hoisted the flag 🇮🇳" />
-    <meta property="og:description" content="Walk into the society courtyard, take the rope, and hoist the tricolour yourself." />
+    <!--
+      Link preview. WhatsApp, Instagram, Telegram, Slack and iMessage all read
+      these, and all of them want og:image to be an ABSOLUTE url — a relative
+      one is a coin flip. `%SITE_URL%` is substituted at build time by the
+      plugin in vite.config.js, from SITE_URL or from Vercel's own env vars.
+      With neither set it collapses to a root-relative path, which works on a
+      root deploy and is the best that can be done without knowing the domain.
+    -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Raise It Together" />
+    <meta property="og:title" content="I hoisted the flag 🇮🇳" />
+    <meta
+      property="og:description"
+      content="Walk into the society courtyard on 15 August, take the rope, and hoist the tricolour yourself."
+    />
+    <meta property="og:url" content="%SITE_URL%/" />
+    <meta property="og:image" content="%SITE_URL%/share-card.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The Indian tricolour flying over a society courtyard, marigolds and confetti in the air." />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="I hoisted the flag 🇮🇳" />
+    <meta
+      name="twitter:description"
+      content="Walk into the society courtyard on 15 August, take the rope, and hoist the tricolour yourself."
+    />
+    <meta name="twitter:image" content="%SITE_URL%/share-card.jpg" />
 
     <!--
       Critical CSS, inline and deliberately duplicated from style.css.
