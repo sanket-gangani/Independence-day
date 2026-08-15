@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+    <meta name="theme-color" content="#14110d" />
+    <title>I Hoisted the Flag — 15 August</title>
+    <meta name="description" content="Walk into the society courtyard, take the rope, and hoist the tricolour yourself." />
+    <!-- The tricolour, with a real 24-spoke chakra rather than a plain ring.
+         SVG first for anything modern; the PNGs are for browsers and platforms
+         that still insist on a raster, and for the home-screen icon. -->
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="icon" type="image/png" sizes="96x96" href="./favicon-96.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+    <link rel="manifest" href="./site.webmanifest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Hoist the Flag" />
+
+    <meta property="og:title" content="I hoisted the flag 🇮🇳" />
+    <meta property="og:description" content="Walk into the society courtyard, take the rope, and hoist the tricolour yourself." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!--
+      Critical CSS, inline and deliberately duplicated from style.css.
+
+      The stylesheet is imported from JavaScript, so there is a window on first
+      load — and on every dev-server reload — where the browser has the markup
+      but not the rules. Without this, that window paints every screen in the
+      document at once, stacked, unstyled: the title card, the HUD, the
+      celebration, the poster and the error panel all in a column of Times New
+      Roman. It lasts a fraction of a second and it looks broken.
+
+      These rules are the minimum needed for the very first paint to be the
+      loading screen and nothing else. Everything here is repeated in
+      style.css; if you change one, change both.
+    -->
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #14110d;
+        color: #f6f1e7;
+        font-family: ui-sans-serif, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      }
+      #scene {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .screen {
+        position: fixed;
+        inset: 0;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 1.5rem 1.25rem;
+      }
+      /* The only thing that may be visible before the stylesheet lands. */
+      .screen.gone,
+      .sound-btn.gone {
+        display: none;
+      }
+      .screen.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .loader {
+        background: radial-gradient(120% 90% at 50% 12%, #2b2118 0%, #16120e 55%, #0f0c09 100%);
+      }
+      .loader-inner {
+        display: grid;
+        justify-items: center;
+        gap: 0.85rem;
+      }
+      .loader-text {
+        font-size: 0.72rem;
+        letter-spacing: 0.26em;
+        text-transform: uppercase;
+        color: rgba(246, 241, 231, 0.62);
+        font-weight: 700;
+      }
+      .loader-step {
+        font-size: 0.7rem;
+        color: rgba(246, 241, 231, 0.36);
+        letter-spacing: 0.08em;
+        height: 1em;
+        font-style: italic;
+      }
+      .tri-bar {
+        width: min(13rem, 58vw);
+        height: 3px;
+        border-radius: 99px;
+        background: rgba(246, 241, 231, 0.14);
+        overflow: hidden;
+      }
+      .brandmark {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0.4rem;
+        z-index: 20;
+        margin: 0;
+        text-align: center;
+        font-size: 0.55rem;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: rgba(246, 241, 231, 0.3);
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="scene"></canvas>
+
+    <!-- Loading -->
+    <div id="loading" class="screen loader">
+      <div class="loader-inner">
+        <span class="tri-rule"></span>
+        <p class="loader-text">Getting the courtyard ready</p>
+        <div class="tri-bar"><i></i></div>
+        <p id="loading-step" class="loader-step">waking the sun</p>
+      </div>
+    </div>
+
+    <!-- Title -->
+    <div id="title" class="screen hidden gone">
+      <div class="sheet">
+        <span class="tri-rule"></span>
+        <p class="eyebrow">Independence Day</p>
+        <h1>Hoist the flag</h1>
+        <p class="sub">
+          It's just after seven. The whole society is out in the courtyard, and
+          nobody has taken the rope yet.
+        </p>
+        <div class="fields">
+          <label class="field">
+            <span>Your name <em>optional</em></span>
+            <input id="input-name" type="text" maxlength="24" autocomplete="given-name" placeholder="Sanket" />
+          </label>
+          <label class="field">
+            <span>Where are you <em>optional</em></span>
+            <input id="input-place" type="text" maxlength="32" autocomplete="address-level2" placeholder="Bengaluru" />
+          </label>
+        </div>
+        <button id="btn-begin" class="btn primary">Step into the courtyard</button>
+        <p class="fineprint">
+          <span class="desktop-hint">W A S D or arrows to walk · drag to look</span>
+          <span class="touch-hint">Hold the lower screen to walk · slide to steer</span>
+          · sound on
+        </p>
+      </div>
+    </div>
+
+    <!-- In-scene HUD -->
+    <div id="hud" class="screen hidden gone pass-through">
+      <div class="hud-top">
+        <p id="player-line" class="player-line"></p>
+        <div id="hoist-meter" class="hoist hidden">
+          <div class="hoist-track"><i id="hoist-fill"></i></div>
+          <p class="hoist-label">Hoisting</p>
+        </div>
+      </div>
+
+      <div class="hud-bottom">
+        <!-- The prompt is the button. One tap takes the rope and the flag
+             goes up, so there is nothing else to reach for on a phone. -->
+        <button id="prompt" class="prompt hidden" type="button">
+          <kbd>E</kbd>
+          <span id="prompt-text">Pull the rope</span>
+        </button>
+
+        <p id="move-hint" class="move-hint">
+          <span class="desktop-hint">W A S D to walk · drag to look</span>
+          <span class="touch-hint">Hold the lower screen to walk · slide to steer</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Sound -->
+    <button id="btn-sound" class="sound-btn gone" type="button" aria-label="Sound on or off">
+      <span id="sound-icon">♪</span>
+    </button>
+
+    <!-- Celebrate -->
+    <div id="celebrate" class="screen celebrate hidden gone">
+      <div class="celebrate-inner">
+        <span class="tri-rule center"></span>
+        <h2 id="celebrate-title">The flag is up</h2>
+        <p id="celebrate-sub" class="celebrate-sub">Jai Hind.</p>
+        <button id="btn-share" class="btn primary">Make my photograph</button>
+      </div>
+    </div>
+
+    <!-- Poster -->
+    <div id="poster" class="screen hidden gone">
+      <div class="sheet poster-sheet">
+        <img id="poster-img" alt="Your Independence Day photograph" />
+        <button id="btn-share-native" class="btn primary" type="button">
+          <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3.5v11" />
+            <path d="M8.2 7.3 12 3.5l3.8 3.8" />
+            <path d="M6.5 11.5H5.2A1.2 1.2 0 0 0 4 12.7v6.1A1.2 1.2 0 0 0 5.2 20h13.6a1.2 1.2 0 0 0 1.2-1.2v-6.1a1.2 1.2 0 0 0-1.2-1.2h-1.3" />
+          </svg>
+          <span id="share-label">Share</span>
+        </button>
+        <button id="btn-download" class="btn ghost" type="button">Save to photos</button>
+        <button id="btn-poster-close" class="btn link" type="button">Back to the courtyard</button>
+      </div>
+    </div>
+
+    <div id="fatal" class="screen hidden gone">
+      <div class="sheet">
+        <h2>Couldn't start</h2>
+        <p id="fatal-msg" class="fineprint"></p>
+      </div>
+    </div>
+
+    <p class="brandmark">FutureLab Studios</p>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
